@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Ole Consignado</Authors>
+    <Copyright>Ole Consignado (c) 2019</Copyright>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <PackageProjectUrl>https://github.com/OleConsignado/otc-hosted-worker</PackageProjectUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DocumentationFile>bin\Debug\netstandard2.0\Otc.WebHostedWorkerAdapter.Abstractions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DocumentationFile>bin\Release\netstandard2.0\Otc.WebHostedWorkerAdapter.Abstractions.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>
