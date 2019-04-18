@@ -33,6 +33,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddHostedService<BackgroundHostedService>();
             services.AddSingleton<IHostedWorkerHealth, HostedWorkerHealth>();
             services.AddSingleton<IHostedWorkerTrigger, HostedWorkerTrigger>();
+            services.AddScoped<IDiagnosticsConsumer, DiagnosticsService>();
+            services.AddScoped<IDiagnosticsProducer, DiagnosticsService>();
             services.AddSingleton<IHttpClientFactory>(new HttpClientFactory());
             services.AddScoped(typeof(IHostedWorker), hostedWorkerImplementationType);
 

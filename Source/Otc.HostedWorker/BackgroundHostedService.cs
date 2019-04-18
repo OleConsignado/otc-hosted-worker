@@ -14,23 +14,17 @@ namespace Otc.HostedWorker
         private readonly ILogger logger;
         private readonly IServiceProvider serviceProvider;
         private readonly HostedWorkerConfiguration configuration;
-
+        private readonly IDiagnosticsProducer diagnosticsProducer;
         public const int TimeoutPanicExitCode = 127;
         public const int MaxConsecutiveErrorsReachedPanicExitCode = 234;
 
-        public BackgroundHostedService(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, HostedWorkerConfiguration configuration)
+        public BackgroundHostedService(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, HostedWorkerConfiguration configuration, IDiagnosticsProducer diagnosticsProducer)
         {
             logger = loggerFactory?.CreateLogger<BackgroundHostedService>() ??
                 throw new ArgumentNullException(nameof(loggerFactory));
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        }
-
-        public override Task StartAsync(CancellationToken cancellationToken)
-        {
-            logger.LogInformation("BackgroundHostedService: Start fired.");
-
-            return base.StartAsync(cancellationToken);
+            this.diagnosticsProducer = diagnosticsProducer ?? throw new ArgumentNullException(nameof(diagnosticsProducer));
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
@@ -58,6 +52,8 @@ namespace Otc.HostedWorker
 
         private async Task LogCriticalAndTerminateProcessAsync(int exitCode, string message, params object[] args)
         {
+            diagnosticsProducer.SetPanic();
+
             logger.LogCritical($"PANIC!!! {message} **THE PROCESS IS BEING TERMINATED (GRACEFULLY) IN 1 SECOND.**", args);
             await Task.Delay(1000); // give a chance to log properly
 
@@ -75,8 +71,12 @@ namespace Otc.HostedWorker
 
         private async Task ExecuteHelperAsync(CancellationToken stoppingToken)
         {
+            diagnosticsProducer.Started();
+
             stoppingToken.Register(() => 
             {
+                diagnosticsProducer.ExternalCancelationRequested();
+
                 if (working)
                 {
                     RequestWorkerCancellation();
@@ -88,29 +88,42 @@ namespace Otc.HostedWorker
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                diagnosticsProducer.SetUnknow();
+
                 if (hasPendingWork)
                 {
-                    logger.LogInformation("Pending work! So, working ...");
+                    logger.LogDebug("Pending work! So, working ...");
 
                     hasPendingWork = false;
 
                     try
                     {
                         workerCancellationTokenSource = new CancellationTokenSource();
+                        var scopeId = Guid.NewGuid();
 
                         var workerTask = Task.Run(async () =>
                         {
                             using (var scope = serviceProvider.CreateScope())
-                            using (logger.BeginScope(Guid.NewGuid()))
+                            using (logger.BeginScope(scopeId))
                             {
                                 var worker = scope.ServiceProvider.GetService<IHostedWorker>();
                                 worker.HasPendingWork = false;
-                                working = true;
-                                HostedWorkerHealth.CurrentWorkStartedAt = DateTimeOffset.Now;
-                                await worker.WorkAsync(workerCancellationTokenSource.Token);
-                                working = false;
-                                HostedWorkerHealth.CurrentWorkStartedAt = null;
-                                hasPendingWork = worker.HasPendingWork;
+
+                                try
+                                {  
+                                    diagnosticsProducer.WorkerExecutionStarted();    
+                                    working = true;
+                                    HostedWorkerHealth.CurrentWorkStartedAt = DateTimeOffset.Now;
+                                    await worker.WorkAsync(workerCancellationTokenSource.Token);
+                                    diagnosticsProducer.WorkerSuccessfulFinished();
+                                }
+                                finally
+                                {
+                                    working = false;
+                                    HostedWorkerHealth.CurrentWorkStartedAt = null;
+                                    hasPendingWork = worker.HasPendingWork;
+                                    diagnosticsProducer.WorkerExecutionFinished();
+                                }
                             }
                         });
 
@@ -119,8 +132,8 @@ namespace Otc.HostedWorker
 
                         if (index == -1)
                         {
-                            logger.LogError("Worker has timedout. Asking it to stop ...");
                             workerCancellationTokenSource.Cancel();
+                            diagnosticsProducer.ExecutionTimeout();
 
                             // Wait for more [WorkerTerminationTorerationTimeoutInSeconds] seconds
                             index = Task.WaitAny(new Task[] { workerTask }, TimeSpan.FromSeconds(configuration.WorkerTerminationTorerationTimeoutInSeconds));
@@ -132,7 +145,7 @@ namespace Otc.HostedWorker
                             }
                             else
                             {
-                                logger.LogWarning("Worker sucessfully stoped after asked to stop due the timeout ...");
+                                diagnosticsProducer.CancelationRequestDueTimeoutWorked();
                             }
                         }
 
@@ -142,7 +155,7 @@ namespace Otc.HostedWorker
                     catch (Exception e)
                     {
                         consecutiveErrors++;
-                        logger.LogError(e, "BackgroundHostedService worker failed.");
+                        diagnosticsProducer.WorkerFail(e);
 
                         if (consecutiveErrors > configuration.MaxConsecutiveErrors)
                         {
@@ -152,6 +165,8 @@ namespace Otc.HostedWorker
                     }
                 }
 
+                diagnosticsProducer.SetUnknow();
+
                 if (!hasPendingWork)
                 {
                     bool pulled = Pulled();
@@ -160,12 +175,14 @@ namespace Otc.HostedWorker
                     {
                         await Task.Delay(50);
                         pulled = Pulled();
+                        diagnosticsProducer.SetIdle();
                     }
 
                     hasPendingWork = pulled;
                 }
             }
 
+            diagnosticsProducer.SetTerminating();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
