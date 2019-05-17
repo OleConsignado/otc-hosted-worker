@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Otc.AspNetCore.ApiBoot" Version="3.1.1" />    
+    <PackageReference Include="Otc.AspNetCore.ApiBoot" Version="3.1.4" />    
   </ItemGroup>
 
   <ItemGroup>
