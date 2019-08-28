@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.WebHostedWorkerAdapter"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.WebHostedWorkerAdapter.Abstractions", "Otc.WebHostedWorkerAdapter.Abstractions\Otc.WebHostedWorkerAdapter.Abstractions.csproj", "{E2F1166C-0246-4312-8935-8BF33E2B51CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otc.HostedWorker.Tests", "Otc.HostedWorker.Tests\Otc.HostedWorker.Tests.csproj", "{188872DD-8844-47A4-B8CC-A1ABF2483456}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{E2F1166C-0246-4312-8935-8BF33E2B51CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2F1166C-0246-4312-8935-8BF33E2B51CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2F1166C-0246-4312-8935-8BF33E2B51CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{188872DD-8844-47A4-B8CC-A1ABF2483456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{188872DD-8844-47A4-B8CC-A1ABF2483456}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{188872DD-8844-47A4-B8CC-A1ABF2483456}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{188872DD-8844-47A4-B8CC-A1ABF2483456}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

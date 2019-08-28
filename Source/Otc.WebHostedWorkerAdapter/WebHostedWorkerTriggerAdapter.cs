@@ -35,6 +35,9 @@ namespace Otc.WebHostedWorkerAdapter
                 try
                 {
                     await RequestTriggerPullAsync();
+
+                    // TODO: melhorar texto
+                    logger.LogDebug("Sucesso");
                 }
                 catch (Exception e)
                 {

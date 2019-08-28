@@ -41,10 +41,16 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddHostedWorker<THostedWorkerImpl>(this IServiceCollection services, HostedWorkerConfiguration hostedWorkerConfiguration)
-            where THostedWorkerImpl : IHostedWorker
+        public static IServiceCollection AddHostedWorker<THostedWorker>(this IServiceCollection services, HostedWorkerConfiguration hostedWorkerConfiguration)
+            where THostedWorker : IHostedWorker
         {
-            return AddHostedWorker(services, typeof(THostedWorkerImpl), hostedWorkerConfiguration);
+            return AddHostedWorker(services, typeof(THostedWorker), hostedWorkerConfiguration);
+        }
+
+        public static IServiceCollection AddHostedWorker<THostedWorker>(this IServiceCollection services)
+            where THostedWorker : IHostedWorker
+        {
+            return AddHostedWorker<THostedWorker>(services, new HostedWorkerConfiguration());
         }
     }
 }
