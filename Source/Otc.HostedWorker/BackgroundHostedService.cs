@@ -18,12 +18,16 @@ namespace Otc.HostedWorker
         public const int TimeoutPanicExitCode = 127;
         public const int MaxConsecutiveErrorsReachedPanicExitCode = 234;
 
-        public BackgroundHostedService(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, HostedWorkerConfiguration configuration)
+        public BackgroundHostedService(ILoggerFactory loggerFactory, 
+            IServiceProvider serviceProvider, 
+            HostedWorkerConfiguration configuration)
         {
             logger = loggerFactory?.CreateLogger<BackgroundHostedService>() ??
                 throw new ArgumentNullException(nameof(loggerFactory));
-            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.serviceProvider = serviceProvider ?? 
+                throw new ArgumentNullException(nameof(serviceProvider));
+            this.configuration = configuration ?? 
+                throw new ArgumentNullException(nameof(configuration));
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
@@ -44,7 +48,8 @@ namespace Otc.HostedWorker
 
         private void RequestWorkerCancellation()
         {
-            logger.LogInformation($"Cancellation for {nameof(workerCancellationTokenSource)} was requested.");
+            logger.LogInformation($"Cancellation for " +
+                $"{nameof(workerCancellationTokenSource)} was requested.");
 
             if (workerCancellationTokenSource != null)
             {
@@ -52,21 +57,26 @@ namespace Otc.HostedWorker
             }
             else
             {
-                logger.LogWarning($"{nameof(workerCancellationTokenSource)} is null, could not request cancellation.");
+                logger.LogWarning($"{nameof(workerCancellationTokenSource)} " +
+                    $"is null, could not request cancellation.");
             }
         }
 
-        private async Task LogCriticalAndTerminateProcessAsync(int exitCode, string message, params object[] args)
+        private async Task LogCriticalAndTerminateProcessAsync(int exitCode, 
+            string message, params object[] args)
         {
-            logger.LogCritical($"PANIC!!! {message} **THE PROCESS IS BEING TERMINATED (GRACEFULLY) IN 1 SECOND.**", args);
+            logger.LogCritical($"PANIC!!! {message} **THE PROCESS IS BEING " +
+                $"TERMINATED (GRACEFULLY) IN 1 SECOND.**", args);
             await Task.Delay(1000); // give a chance to log properly
 
             // Terminate process gracefully
             Environment.Exit(exitCode);
 
-            // Termination fallback, it will abrubtely killed after 5 seconds if process don't terminate gracefully
+            // Termination fallback, it will abrubtely killed after 5 seconds 
+            // if process don't terminate gracefully
             await Task.Delay(5000);
-            logger.LogCritical("PANIC!!! FAIL TO ABORT PROCESS, TRYING TO **ABRUBTELY KILL IT** IN 1 SECOND.");
+            logger.LogCritical("PANIC!!! FAIL TO ABORT PROCESS, TRYING TO " +
+                "**ABRUBTELY KILL IT** IN 1 SECOND.");
             await Task.Delay(1000);
             Process.GetCurrentProcess().Kill();
         }
@@ -132,16 +142,21 @@ namespace Otc.HostedWorker
                             workerCancellationTokenSource.Cancel();
 
                             // Wait for more [WorkerTerminationTorerationTimeoutInSeconds] seconds
-                            index = Task.WaitAny(new Task[] { workerTask }, TimeSpan.FromSeconds(configuration.WorkerTerminationTorerationTimeoutInSeconds));
+                            index = Task.WaitAny(new Task[] { workerTask }, 
+                                TimeSpan.FromSeconds(configuration.WorkerTerminationTorerationTimeoutInSeconds));
 
                             if (index == -1)
                             {
-                                await LogCriticalAndTerminateProcessAsync(TimeoutPanicExitCode, "Worker has timedout then it didn't stoped after " +
-                                    "{WorkerTerminationTorerationTimeoutInSeconds} from token cancellation request.", configuration.WorkerTerminationTorerationTimeoutInSeconds);
+                                await LogCriticalAndTerminateProcessAsync(TimeoutPanicExitCode, 
+                                    "Worker has timedout then it didn't stoped after " +
+                                    "{WorkerTerminationTorerationTimeoutInSeconds} from " +
+                                    "token cancellation request.", 
+                                    configuration.WorkerTerminationTorerationTimeoutInSeconds);
                             }
                             else
                             {
-                                logger.LogWarning("Worker sucessfully stoped after asked to stop due the timeout ...");
+                                logger.LogWarning("Worker sucessfully stoped " +
+                                    "after asked to stop due the timeout ...");
                             }
                         }
 
@@ -155,8 +170,10 @@ namespace Otc.HostedWorker
 
                         if (consecutiveErrors > configuration.MaxConsecutiveErrors)
                         {
-                            await LogCriticalAndTerminateProcessAsync(MaxConsecutiveErrorsReachedPanicExitCode, $"{nameof(configuration.MaxConsecutiveErrors)} reached! " +
-                                $"Current consecutive errors count is {{ConsecutiveErrors}}.", consecutiveErrors);
+                            await LogCriticalAndTerminateProcessAsync(MaxConsecutiveErrorsReachedPanicExitCode, 
+                                $"{nameof(configuration.MaxConsecutiveErrors)} reached! " +
+                                $"Current consecutive errors count is {{ConsecutiveErrors}}.", 
+                                consecutiveErrors);
                         }
                     }
                 }
@@ -180,7 +197,8 @@ namespace Otc.HostedWorker
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("Starting ExecuteAsync ...");
-            await Task.Factory.StartNew(async () => await ExecuteHelperAsync(stoppingToken), TaskCreationOptions.LongRunning);
+            await Task.Factory.StartNew(async () => await ExecuteHelperAsync(stoppingToken), 
+                TaskCreationOptions.LongRunning);
             logger.LogInformation("ExecuteAsync done.");
         }
 
