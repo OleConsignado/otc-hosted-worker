@@ -84,7 +84,16 @@ namespace Otc.HostedWorker
             });
 
             int consecutiveErrors = 0;
-            bool hasPendingWork = false;
+
+            if(configuration.WorkOnStartup)
+            {
+                logger.LogInformation(
+                    $"{nameof(HostedWorkerConfiguration.WorkOnStartup)} " +
+                    $"is true, so executing {nameof(IHostedWorker)}." +
+                    $"{nameof(IHostedWorker.WorkAsync)} right now.");
+            }
+
+            bool hasPendingWork = configuration.WorkOnStartup;
 
             while (!stoppingToken.IsCancellationRequested)
             {
