@@ -12,7 +12,8 @@ namespace Otc.WebHostedWorker.Controllers
 
         public TriggerController(IHostedWorkerTrigger hostedWorkerTrigger)
         {
-            this.hostedWorkerTrigger = hostedWorkerTrigger ?? throw new System.ArgumentNullException(nameof(hostedWorkerTrigger));
+            this.hostedWorkerTrigger = hostedWorkerTrigger ??
+                throw new System.ArgumentNullException(nameof(hostedWorkerTrigger));
         }
 
         [HttpPost("Pull")]

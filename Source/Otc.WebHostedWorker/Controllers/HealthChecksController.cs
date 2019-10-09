@@ -14,7 +14,8 @@ namespace Otc.WebHostedWorker.Controllers
 
         public HealthChecksController(IHostedWorkerHealth hostedWorkerHealth)
         {
-            this.hostedWorkerHealth = hostedWorkerHealth ?? throw new ArgumentNullException(nameof(hostedWorkerHealth));
+            this.hostedWorkerHealth = hostedWorkerHealth ?? 
+                throw new ArgumentNullException(nameof(hostedWorkerHealth));
         }
 
         [HttpGet("/healthz")]

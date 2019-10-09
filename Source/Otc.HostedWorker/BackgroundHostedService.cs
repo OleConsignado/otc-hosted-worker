@@ -32,14 +32,14 @@ namespace Otc.HostedWorker
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            logger.LogInformation("BackgroundHostedService: Start fired.");
+            logger.LogInformation("{MethodName}: Start fired.", nameof(BackgroundHostedService));
 
             return base.StartAsync(cancellationToken);
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            logger.LogInformation("BackgroundHostedService: Stop fired.");
+            logger.LogInformation("{MethodName}: Stop fired.", nameof(BackgroundHostedService));
 
             return base.StopAsync(cancellationToken);
         }
@@ -48,8 +48,8 @@ namespace Otc.HostedWorker
 
         private void RequestWorkerCancellation()
         {
-            logger.LogInformation($"Cancellation for " +
-                $"{nameof(workerCancellationTokenSource)} was requested.");
+            logger.LogInformation("Cancellation for {MethodName} was requested.", 
+                nameof(workerCancellationTokenSource));
 
             if (workerCancellationTokenSource != null)
             {
@@ -57,16 +57,16 @@ namespace Otc.HostedWorker
             }
             else
             {
-                logger.LogWarning($"{nameof(workerCancellationTokenSource)} " +
-                    $"is null, could not request cancellation.");
+                logger.LogWarning("{MethodName} is null, could not request cancellation.", 
+                    nameof(workerCancellationTokenSource));
             }
         }
 
         private async Task LogCriticalAndTerminateProcessAsync(int exitCode, 
             string message, params object[] args)
         {
-            logger.LogCritical($"PANIC!!! {message} **THE PROCESS IS BEING " +
-                $"TERMINATED (GRACEFULLY) IN 1 SECOND.**", args);
+            logger.LogCritical("PANIC!!! {Message} **THE PROCESS IS BEING " +
+                "TERMINATED (GRACEFULLY) IN 1 SECOND.**", message, args);
             await Task.Delay(1000); // give a chance to log properly
 
             // Terminate process gracefully
@@ -97,10 +97,10 @@ namespace Otc.HostedWorker
 
             if(configuration.WorkOnStartup)
             {
-                logger.LogInformation(
-                    $"{nameof(HostedWorkerConfiguration.WorkOnStartup)} " +
-                    $"is true, so executing {nameof(IHostedWorker)}." +
-                    $"{nameof(IHostedWorker.WorkAsync)} right now.");
+                logger.LogInformation("{WorkOnStartup} is true, so executing " +
+                    "IHostedWorker.{MethodName} right now.", 
+                    nameof(HostedWorkerConfiguration.WorkOnStartup), 
+                    nameof(IHostedWorker.WorkAsync));
             }
 
             bool hasPendingWork = configuration.WorkOnStartup;
@@ -196,10 +196,10 @@ namespace Otc.HostedWorker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation("Starting ExecuteAsync ...");
+            logger.LogInformation("Starting {MethodName} ...", nameof(ExecuteAsync));
             await Task.Factory.StartNew(async () => await ExecuteHelperAsync(stoppingToken), 
                 TaskCreationOptions.LongRunning);
-            logger.LogInformation("ExecuteAsync done.");
+            logger.LogInformation("{MethodName} done.", nameof(ExecuteAsync));
         }
 
         private bool Pulled()

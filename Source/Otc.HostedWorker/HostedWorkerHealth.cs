@@ -11,14 +11,16 @@ namespace Otc.HostedWorker
 
         public HostedWorkerHealth(HostedWorkerConfiguration hostedWorkerConfiguration)
         {
-            this.hostedWorkerConfiguration = hostedWorkerConfiguration ?? throw new ArgumentNullException(nameof(hostedWorkerConfiguration));
+            this.hostedWorkerConfiguration = hostedWorkerConfiguration ?? 
+                throw new ArgumentNullException(nameof(hostedWorkerConfiguration));
         }
 
         public bool Healthy
         {
             get
             {
-                if (CurrentWorkStartedAt?.AddSeconds(hostedWorkerConfiguration.WorkerTimeoutInSeconds) < DateTimeOffset.Now)
+                if (CurrentWorkStartedAt?
+                    .AddSeconds(hostedWorkerConfiguration.WorkerTimeoutInSeconds) < DateTimeOffset.Now)
                 {
                     return false;
                 }
