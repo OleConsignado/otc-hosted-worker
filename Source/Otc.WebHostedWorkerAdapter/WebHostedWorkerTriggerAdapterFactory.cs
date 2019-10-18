@@ -10,10 +10,13 @@ namespace Otc.WebHostedWorkerAdapter
         private readonly ILoggerFactory loggerFactory;
         private readonly IHttpClientFactory httpClientFactory;
 
-        public WebHostedWorkerTriggerAdapterFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory)
+        public WebHostedWorkerTriggerAdapterFactory(ILoggerFactory loggerFactory, 
+            IHttpClientFactory httpClientFactory)
         {
-            this.loggerFactory = loggerFactory ?? throw new System.ArgumentNullException(nameof(loggerFactory));
-            this.httpClientFactory = httpClientFactory ?? throw new System.ArgumentNullException(nameof(httpClientFactory));
+            this.loggerFactory = loggerFactory ??
+                throw new System.ArgumentNullException(nameof(loggerFactory));
+            this.httpClientFactory = httpClientFactory ??
+                throw new System.ArgumentNullException(nameof(httpClientFactory));
         }
 
         public IWebHostedWorkerTriggerAdapter Create(string baseUrl)

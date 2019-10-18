@@ -13,16 +13,17 @@ namespace Otc.WebHostedWorkerAdapter
         private readonly ILogger logger;
         public const int RequestWaitTimeoutMilliseconds = 1000;
 
-        public WebHostedWorkerTriggerAdapter(Uri baseUri, 
+        public WebHostedWorkerTriggerAdapter(Uri baseUri,
             ILoggerFactory loggerFactory,
             IHttpClientFactory httpClientFactory)
         {
             logger = loggerFactory?
-                .CreateLogger($"{typeof(WebHostedWorkerTriggerAdapter).FullName}-{baseUri}") 
+                .CreateLogger($"{typeof(WebHostedWorkerTriggerAdapter).FullName}-{baseUri}")
                 ?? throw new ArgumentNullException(nameof(loggerFactory));
 
             this.baseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
-            this.httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            this.httpClientFactory = httpClientFactory ?? 
+                throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         public void Pull()
@@ -38,13 +39,15 @@ namespace Otc.WebHostedWorkerAdapter
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Exception ocurred while trying to request WebHostedWorker/Trigger/Pull.");
+                    logger.LogError(e, "Exception ocurred while trying to request " +
+                        "WebHostedWorker/Trigger/Pull.");
                 }
             });
 
             if (Task.WaitAny(new Task[] { task }, RequestWaitTimeoutMilliseconds) == -1)
             {
-                logger.LogWarning("Call to WebHostedWorker/Trigger/Pull took longer than {RequestWaitTimeoutMilliseconds} milliseconds to reply.",
+                logger.LogWarning("Call to WebHostedWorker/Trigger/Pull took longer than " +
+                    "{RequestWaitTimeoutMilliseconds} milliseconds to reply.",
                     RequestWaitTimeoutMilliseconds);
             }
         }

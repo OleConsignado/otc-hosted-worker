@@ -6,14 +6,16 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class OtcWebHostedWorkerAdapterServiceCollectionExtensions
     {
-        public static IServiceCollection AddOtcWebHostedWorkerTriggerAdapter(this IServiceCollection services)
+        public static IServiceCollection AddOtcWebHostedWorkerTriggerAdapter(
+            this IServiceCollection services)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddScoped<IWebHostedWorkerTriggerAdapterFactory, WebHostedWorkerTriggerAdapterFactory>();
+            services.AddScoped<IWebHostedWorkerTriggerAdapterFactory, 
+                WebHostedWorkerTriggerAdapterFactory>();
 
             return services;
         }
