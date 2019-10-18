@@ -48,7 +48,7 @@ namespace Otc.HostedWorker
 
         private void RequestWorkerCancellation()
         {
-            logger.LogInformation($"Cancellation for {nameof(RequestWorkerCancellation)} " +
+            logger.LogInformation($"Cancellation for {nameof(workerCancellationTokenSource)} " +
                 $"was requested.");
 
             if (workerCancellationTokenSource != null)
@@ -57,7 +57,7 @@ namespace Otc.HostedWorker
             }
             else
             {
-                logger.LogWarning($"{nameof(RequestWorkerCancellation)} is null, could " +
+                logger.LogWarning($"{nameof(workerCancellationTokenSource)} is null, could " +
                     $"not request cancellation.");
             }
         }
@@ -65,8 +65,8 @@ namespace Otc.HostedWorker
         private async Task LogCriticalAndTerminateProcessAsync(int exitCode, 
             string message, params object[] args)
         {
-            logger.LogCritical("PANIC!!! {Message} **THE PROCESS IS BEING " +
-                "TERMINATED (GRACEFULLY) IN 1 SECOND.**", message, args);
+            logger.LogCritical($"PANIC!!! {message} **THE PROCESS IS BEING " +
+                $"TERMINATED (GRACEFULLY) IN 1 SECOND.**", args);
             await Task.Delay(1000); // give a chance to log properly
 
             // Terminate process gracefully
@@ -97,9 +97,8 @@ namespace Otc.HostedWorker
 
             if(configuration.WorkOnStartup)
             {
-                logger.LogInformation("{WorkOnStartup} is true, so executing " +
-                    $"{nameof(ExecuteHelperAsync)} right now.", 
-                    nameof(HostedWorkerConfiguration.WorkOnStartup));
+                logger.LogInformation($"{nameof(HostedWorkerConfiguration.WorkOnStartup)} is true, " +
+                    $"so executing {nameof(IHostedWorker.WorkAsync)} right now.");
             }
 
             bool hasPendingWork = configuration.WorkOnStartup;
